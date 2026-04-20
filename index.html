@@ -1,47 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Stock Market Analysis</title>
+    <title>Stock Analysis Pro</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body {
-            font-family: Arial;
-            background: #f4f4f4;
-            padding: 20px;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: white;
         }
-        h1 {
-            color: #2c3e50;
-        }
-        .box {
-            background: white;
+
+        nav {
+            position: fixed;
+            width: 100%;
+            background: #1e293b;
             padding: 15px;
-            margin: 15px 0;
-            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        nav a {
+            color: white;
+            margin: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #38bdf8;
+        }
+
+        section {
+            padding: 100px 20px;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #38bdf8;
+            border: none;
+            color: black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0ea5e9;
         }
     </style>
 </head>
+
 <body>
 
+<!-- NAVBAR -->
+<nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#objective">Objective</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#analysis">Analysis</a>
+    <a href="#graphs">Graphs</a>
+    <a href="#tools">Tools</a>
+    <a href="#conclusion">Conclusion</a>
+</nav>
+
+<!-- HOME -->
+<section id="home">
     <h1>📊 Stock Market Analysis</h1>
-
-    <div class="box">
-        <h2>Objective</h2>
-        <p>
-            This project analyzes stock market trends using historical data
-            to understand price movements, identify patterns, and support
-            better investment decisions.
-        </p>
+    <div class="card">
+        <p>Interactive analysis of stock trends using real data.</p>
+        <button onclick="showMsg()">Click Me</button>
     </div>
+</section>
 
-    <div class="box">
-        <h2>Dataset</h2>
-        <p>
-            Data is collected from Yahoo Finance and includes Open, Close,
-            High, Low prices and trading Volume for detailed analysis.
-        </p>
+<!-- ABOUT -->
+<section id="about">
+    <h2>About</h2>
+    <div class="card">
+        <p>Stock market is a platform where shares are bought and sold based on demand and supply.</p>
     </div>
+</section>
 
-    <div class="box">
-        <h2>Tools Used</h2>
+<!-- OBJECTIVE -->
+<section id="objective">
+    <h2>Objective</h2>
+    <div class="card">
+        <p>Analyze trends, identify patterns, and support investment decisions using data visualization.</p>
+    </div>
+</section>
+
+<!-- DATASET -->
+<section id="dataset">
+    <h2>Dataset</h2>
+    <div class="card">
+        <p>Data from Yahoo Finance including Open, Close, High, Low, and Volume.</p>
+    </div>
+</section>
+
+<!-- ANALYSIS -->
+<section id="analysis">
+    <h2>Analysis</h2>
+    <div class="card">
+        <p>We analyze price fluctuations and trading volume to understand market behavior.</p>
+    </div>
+</section>
+
+<!-- GRAPHS -->
+<section id="graphs">
+    <h2>Stock Graph</h2>
+    <div class="card">
+        <canvas id="chart"></canvas>
+    </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+    <h2>Tools Used</h2>
+    <div class="card">
         <ul>
             <li>Python</li>
             <li>Pandas</li>
@@ -49,6 +143,37 @@
             <li>Seaborn</li>
         </ul>
     </div>
+</section>
+
+<!-- CONCLUSION -->
+<section id="conclusion">
+    <h2>Conclusion</h2>
+    <div class="card">
+        <p>This project shows how data helps in making smart financial decisions.</p>
+    </div>
+</section>
+
+<!-- SCRIPT -->
+<script>
+function showMsg() {
+    alert("Welcome to Stock Analysis Project 🚀");
+}
+
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri'],
+        datasets: [{
+            label: 'Stock Price',
+            data: [100, 120, 90, 140, 160],
+            borderColor: '#38bdf8',
+            borderWidth: 3
+        }]
+    }
+});
+</script>
 
 </body>
 </html>
