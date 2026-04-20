@@ -1,65 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Stock Dashboard</title>
-
+<title>Stock Analyzer Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-    font-family: Arial;
-    margin: 0;
-    background: #f5f5f5;
+    font-family: 'Segoe UI', sans-serif;
+    margin:0;
+    background:#f1f5f9;
 }
 
 .header {
-    background: #2c3e50;
-    color: white;
-    padding: 15px;
-    text-align: center;
+    background:#0f172a;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+.search {
+    text-align:center;
+    padding:20px;
+}
+
+button {
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover {
+    background:#1e40af;
 }
 
 .tabs {
-    display: flex;
-    background: white;
-    border-bottom: 2px solid #ddd;
+    display:none;
+    background:white;
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
 }
 
 .tabs button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: white;
-    cursor: pointer;
-    font-weight: bold;
+    background:white;
+    color:black;
 }
 
 .tabs button:hover {
-    background: #eee;
-}
-
-.active {
-    border-bottom: 3px solid #3498db;
+    background:#e2e8f0;
 }
 
 .content {
-    padding: 20px;
-    display: none;
+    display:none;
+    padding:20px;
 }
 
 .card {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 10px;
+    background:white;
+    padding:20px;
+    margin:20px auto;
+    max-width:800px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.pros {
-    border-left: 5px solid green;
+table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
 }
 
-.cons {
-    border-left: 5px solid red;
+table, th, td {
+    border:1px solid #ddd;
+}
+
+th {
+    background:#2563eb;
+    color:white;
+    padding:10px;
+}
+
+td {
+    padding:10px;
+    text-align:center;
+}
+
+.pros { border-left:5px solid green; }
+.cons { border-left:5px solid red; }
+
+canvas {
+    max-width:900px;
+    margin:auto;
+    display:block;
 }
 </style>
 </head>
@@ -67,95 +103,185 @@ body {
 <body>
 
 <div class="header">
-    <h1>📊 VTM Ltd Analysis</h1>
+<h1>📊 Stock Market Analyzer</h1>
+</div>
+
+<!-- SELECT -->
+<div class="search" id="searchBox">
+<h2>Select Company</h2>
+<button onclick="loadCompany('vtm')">VTM Ltd</button>
+<button onclick="loadCompany('tcs')">TCS</button>
+<button onclick="loadCompany('infosys')">Infosys</button>
+<button onclick="loadCompany('reliance')">Reliance</button>
+<button onclick="loadCompany('hdfc')">HDFC Bank</button>
 </div>
 
 <!-- TABS -->
-<div class="tabs">
-    <button onclick="openTab('summary')" class="active">Summary</button>
-    <button onclick="openTab('chart')">Chart</button>
-    <button onclick="openTab('analysis')">Analysis</button>
-    <button onclick="openTab('profit')">P&L</button>
-    <button onclick="openTab('balance')">Balance Sheet</button>
+<div class="tabs" id="tabs">
+<button onclick="openTab('summary')">Summary</button>
+<button onclick="openTab('chart')">Chart</button>
+<button onclick="openTab('analysis')">Analysis</button>
+<button onclick="openTab('pl')">P&L</button>
+<button onclick="openTab('balance')">Balance Sheet</button>
+<button onclick="goBack()">⬅ Back</button>
 </div>
 
-<!-- SUMMARY -->
-<div id="summary" class="content" style="display:block;">
-    <div class="card">
-        <h3>Current Price: ₹75.6</h3>
-        <p>Market Cap: ₹761 Cr</p>
-        <p>High / Low: ₹123 / 53</p>
-    </div>
-</div>
+<!-- CONTENT -->
+<div id="summary" class="content"></div>
 
-<!-- CHART -->
 <div id="chart" class="content">
-    <canvas id="myChart"></canvas>
+<canvas id="myChart"></canvas>
 </div>
 
-<!-- ANALYSIS -->
-<div id="analysis" class="content">
-    <div class="card pros">
-        <h3>PROS</h3>
-        <ul>
-            <li>Profit growth 34% CAGR</li>
-            <li>Healthy dividend payout</li>
-        </ul>
-    </div>
-
-    <div class="card cons">
-        <h3>CONS</h3>
-        <ul>
-            <li>Low return on equity</li>
-            <li>Debtor days increased</li>
-        </ul>
-    </div>
-</div>
-
-<!-- PROFIT -->
-<div id="profit" class="content">
-    <div class="card">
-        <h3>Profit & Loss</h3>
-        <p>Sales: 194 → 371</p>
-        <p>Net Profit: 15 → 22</p>
-    </div>
-</div>
-
-<!-- BALANCE -->
-<div id="balance" class="content">
-    <div class="card">
-        <h3>Balance Sheet</h3>
-        <p>Total Assets: 394 Cr</p>
-        <p>Total Liabilities: 394 Cr</p>
-    </div>
-</div>
+<div id="analysis" class="content"></div>
+<div id="pl" class="content"></div>
+<div id="balance" class="content"></div>
 
 <script>
-// TAB SWITCH
-function openTab(tabName) {
-    let contents = document.getElementsByClassName("content");
-    for (let i = 0; i < contents.length; i++) {
-        contents[i].style.display = "none";
-    }
 
-    document.getElementById(tabName).style.display = "block";
+let chart;
+
+const data = {
+vtm: {
+name:"VTM Ltd",
+price:"₹75.6",
+market:"₹761 Cr",
+chart:[60,80,50,120,75],
+sales:[194,209,208,345,371],
+profit:[15,9,18,45,22],
+assets:["100","150","200","250","394"],
+pros:["34% profit growth","Good dividend"],
+cons:["Low ROE","High debtor days"]
+},
+
+tcs: {
+name:"TCS",
+price:"₹3800",
+market:"₹13L Cr",
+chart:[3000,3200,3400,3600,3800],
+sales:[100,120,140,160,180],
+profit:[30,35,40,45,50],
+assets:["5000","6000","7000","8000","10000"],
+pros:["Market leader","High profit"],
+cons:["Slow growth"]
+},
+
+infosys: {
+name:"Infosys",
+price:"₹1500",
+market:"₹6L Cr",
+chart:[1200,1300,1400,1450,1500],
+sales:[80,90,100,110,120],
+profit:[20,25,28,30,32],
+assets:["2000","3000","4000","4500","5000"],
+pros:["Stable growth"],
+cons:["Competition"]
+},
+
+reliance: {
+name:"Reliance",
+price:"₹2500",
+market:"₹16L Cr",
+chart:[2000,2200,2300,2400,2500],
+sales:[200,250,300,350,400],
+profit:[40,50,60,70,80],
+assets:["10000","12000","15000","18000","20000"],
+pros:["Diversified"],
+cons:["High debt"]
+},
+
+hdfc: {
+name:"HDFC Bank",
+price:"₹1600",
+market:"₹12L Cr",
+chart:[1400,1500,1550,1580,1600],
+sales:[150,160,170,180,190],
+profit:[35,38,40,42,45],
+assets:["9000","12000","15000","17000","18000"],
+pros:["Strong bank"],
+cons:["NPA risk"]
 }
+};
+
+function loadCompany(company) {
+
+document.getElementById("searchBox").style.display="none";
+document.getElementById("tabs").style.display="block";
+
+let c = data[company];
+
+// SUMMARY
+document.getElementById("summary").innerHTML = `
+<div class="card">
+<h2>${c.name}</h2>
+<p><b>Price:</b> ${c.price}</p>
+<p><b>Market Cap:</b> ${c.market}</p>
+</div>`;
+
+// ANALYSIS
+document.getElementById("analysis").innerHTML = `
+<div class="card pros"><h3>Pros</h3><ul>${c.pros.map(p=>"<li>"+p+"</li>").join("")}</ul></div>
+<div class="card cons"><h3>Cons</h3><ul>${c.cons.map(p=>"<li>"+p+"</li>").join("")}</ul></div>`;
+
+// P&L TABLE
+document.getElementById("pl").innerHTML = `
+<div class="card">
+<h3>Profit & Loss</h3>
+<table>
+<tr><th>Year</th><th>Sales</th><th>Profit</th></tr>
+<tr><td>2021</td><td>${c.sales[0]}</td><td>${c.profit[0]}</td></tr>
+<tr><td>2022</td><td>${c.sales[1]}</td><td>${c.profit[1]}</td></tr>
+<tr><td>2023</td><td>${c.sales[2]}</td><td>${c.profit[2]}</td></tr>
+<tr><td>2024</td><td>${c.sales[3]}</td><td>${c.profit[3]}</td></tr>
+<tr><td>2025</td><td>${c.sales[4]}</td><td>${c.profit[4]}</td></tr>
+</table>
+</div>`;
+
+// BALANCE TABLE
+document.getElementById("balance").innerHTML = `
+<div class="card">
+<h3>Balance Sheet</h3>
+<table>
+<tr><th>Year</th><th>Assets</th></tr>
+<tr><td>2021</td><td>${c.assets[0]}</td></tr>
+<tr><td>2022</td><td>${c.assets[1]}</td></tr>
+<tr><td>2023</td><td>${c.assets[2]}</td></tr>
+<tr><td>2024</td><td>${c.assets[3]}</td></tr>
+<tr><td>2025</td><td>${c.assets[4]}</td></tr>
+</table>
+</div>`;
 
 // CHART
-const ctx = document.getElementById('myChart');
+if(chart) chart.destroy();
 
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: ['2021','2022','2023','2024','2025'],
-        datasets: [{
-            label: 'Stock Price',
-            data: [60, 80, 50, 120, 75],
-            borderColor: 'blue',
-            borderWidth: 2
-        }]
-    }
+chart = new Chart(document.getElementById("myChart"), {
+type:"line",
+data:{
+labels:["2021","2022","2023","2024","2025"],
+datasets:[{
+label:"Stock Price",
+data:c.chart,
+borderColor:"#2563eb",
+borderWidth:3
+}]
+}
 });
+
+openTab("summary");
+}
+
+function openTab(tab){
+let contents=document.getElementsByClassName("content");
+for(let i=0;i<contents.length;i++){
+contents[i].style.display="none";
+}
+document.getElementById(tab).style.display="block";
+}
+
+function goBack(){
+location.reload();
+}
+
 </script>
 
 </body>
