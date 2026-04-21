@@ -6,24 +6,17 @@
 
 <style>
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: Arial;
     margin:0;
     background:#020617;
-    color:#e2e8f0;
-    transition:0.4s;
-}
-
-/* LIGHT MODE */
-.light {
-    background:#f1f5f9;
-    color:black;
+    color:white;
 }
 
 /* HEADER */
 .header {
-    padding:20px;
     text-align:center;
-    border-bottom:1px solid #1e293b;
+    padding:20px;
+    border-bottom:1px solid #333;
 }
 
 /* BUTTON */
@@ -31,28 +24,22 @@ button {
     padding:10px 15px;
     margin:5px;
     border:none;
-    background:#3b82f6;
+    background:#2563eb;
     color:white;
     border-radius:5px;
     cursor:pointer;
 }
-
-button:hover {
-    background:#2563eb;
-}
+button:hover { background:#1e40af; }
 
 /* SEARCH */
-.search {
-    text-align:center;
-    padding:20px;
-}
+.search { text-align:center; padding:20px; }
 
 /* TABS */
 .tabs {
     display:none;
-    padding:10px;
     text-align:center;
-    border-bottom:1px solid #1e293b;
+    padding:10px;
+    border-bottom:1px solid #333;
 }
 
 /* CONTENT */
@@ -62,32 +49,46 @@ button:hover {
     animation:fade 0.5s;
 }
 
-/* ANIMATION */
 @keyframes fade {
-    from {opacity:0; transform:translateY(10px);}
-    to {opacity:1; transform:translateY(0);}
+    from {opacity:0;}
+    to {opacity:1;}
 }
 
-/* CARDS */
+/* CARD */
 .card {
-    border:1px solid #1e293b;
+    background:#111;
     padding:20px;
     margin:20px auto;
     max-width:900px;
-    border-radius:12px;
+    border-radius:10px;
 }
 
-/* GRID */
-.grid {
+/* KPI */
+.kpi-grid {
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:10px;
 }
 
-.box {
+.kpi {
+    background:#020617;
+    border:1px solid #333;
     padding:15px;
-    border:1px solid #1e293b;
     border-radius:10px;
+    text-align:center;
+}
+
+.kpi span {
+    color:#22c55e;
+    font-weight:bold;
+}
+
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:20px;
 }
 
 /* TABLE */
@@ -95,22 +96,14 @@ table {
     width:100%;
     border-collapse:collapse;
 }
-
-th {
-    background:#1e293b;
-    padding:10px;
-}
-
-td {
+th, td {
+    border:1px solid #333;
     padding:10px;
     text-align:center;
-    border-bottom:1px solid #1e293b;
 }
+th { background:#2563eb; }
 
-/* PROS CONS */
-.pros { border-left:5px solid green; }
-.cons { border-left:5px solid red; }
-
+/* CHART */
 canvas {
     max-width:900px;
     margin:auto;
@@ -119,25 +112,28 @@ canvas {
 </style>
 </head>
 
-<body id="body">
+<body>
 
 <div class="header">
 <h1>📊 Stock Market Analyzer</h1>
-<button onclick="toggleTheme()">🌙 / ☀️</button>
 </div>
 
 <!-- SELECT -->
 <div class="search" id="searchBox">
 <h2>Select Company</h2>
+
 <button onclick="loadCompany('vtm')">VTM</button>
 <button onclick="loadCompany('tcs')">TCS</button>
+<button onclick="loadCompany('infosys')">Infosys</button>
+<button onclick="loadCompany('reliance')">Reliance</button>
+<button onclick="loadCompany('hdfc')">HDFC</button>
+
 </div>
 
 <!-- TABS -->
 <div class="tabs" id="tabs">
 <button onclick="openTab('summary')">Summary</button>
 <button onclick="openTab('chart')">Charts</button>
-<button onclick="openTab('analysis')">Analysis</button>
 <button onclick="openTab('pl')">P&L</button>
 <button onclick="openTab('balance')">Balance</button>
 <button onclick="goBack()">⬅ Back</button>
@@ -147,46 +143,86 @@ canvas {
 <div id="summary" class="content"></div>
 
 <div id="chart" class="content">
-<canvas id="priceChart"></canvas><br>
+<canvas id="priceChart"></canvas>
+<br>
 <canvas id="profitChart"></canvas>
 </div>
 
-<div id="analysis" class="content"></div>
 <div id="pl" class="content"></div>
 <div id="balance" class="content"></div>
 
 <script>
 
-let chart1, chart2;
+let chart1 = null;
+let chart2 = null;
 
 const data = {
+
 vtm: {
-name:"VTM Ltd",
-price:"₹75.6",
-market:"₹761 Cr",
-pe:"12.5",
-roe:"10%",
+name:"VTM Ltd", price:"₹75", market:"₹761Cr",
+pe:"12.5", roe:"10%",
+open:"₹74", high:"₹78", low:"₹72",
+volume:"1.2M", high52:"₹123", low52:"₹53",
+dividend:"2%", sector:"Textile", industry:"Cotton",
+
 chart:[60,80,50,120,75],
 sales:[194,209,208,345,371],
 profit:[15,9,18,45,22],
-assets:["100","150","200","250","394"],
-pros:["Good growth","Dividend"],
-cons:["Low ROE"]
+assets:[100,150,200,250,394]
 },
 
 tcs: {
-name:"TCS",
-price:"₹3800",
-market:"₹13L Cr",
-pe:"30",
-roe:"40%",
+name:"TCS", price:"₹3800", market:"₹13L Cr",
+pe:"30", roe:"40%",
+open:"₹3700", high:"₹3850", low:"₹3600",
+volume:"2M", high52:"₹4000", low52:"₹3000",
+dividend:"1.5%", sector:"IT", industry:"Software",
+
 chart:[3000,3200,3400,3600,3800],
 sales:[100,120,140,160,180],
 profit:[30,35,40,45,50],
-assets:["5000","6000","7000","8000","10000"],
-pros:["Market leader"],
-cons:["Slow growth"]
+assets:[5000,6000,7000,8000,10000]
+},
+
+infosys: {
+name:"Infosys", price:"₹1500", market:"₹6L Cr",
+pe:"25", roe:"30%",
+open:"₹1480", high:"₹1520", low:"₹1450",
+volume:"1.5M", high52:"₹1600", low52:"₹1200",
+dividend:"2%", sector:"IT", industry:"Software",
+
+chart:[1200,1300,1400,1450,1500],
+sales:[80,90,100,110,120],
+profit:[20,25,28,30,32],
+assets:[2000,3000,4000,4500,5000]
+},
+
+reliance: {
+name:"Reliance", price:"₹2500", market:"₹16L Cr",
+pe:"28", roe:"20%",
+open:"₹2450", high:"₹2550", low:"₹2400",
+volume:"3M", high52:"₹2700", low52:"₹2000",
+dividend:"1%", sector:"Energy", industry:"Oil & Gas",
+
+chart:[2000,2200,2300,2400,2500],
+sales:[200,250,300,350,400],
+profit:[40,50,60,70,80],
+assets:[10000,12000,15000,18000,20000]
+},
+
+hdfc: {
+name:"HDFC Bank", price:"₹1600", market:"₹12L Cr",
+pe:"22", roe:"18%",
+open:"₹1580", high:"₹1620", low:"₹1550",
+volume:"2.5M", high52:"₹1700", low52:"₹1400",
+dividend:"1.2%", sector:"Banking", industry:"Finance",
+
+chart:[1400,1500,1550,1580,1600],
+sales:[150,160,170,180,190],
+profit:[35,38,40,42,45],
+assets:[9000,12000,15000,17000,18000]
 }
+
 };
 
 function loadCompany(company) {
@@ -196,27 +232,40 @@ document.getElementById("tabs").style.display="block";
 
 let c = data[company];
 
-// SUMMARY
+// 🔥 SUMMARY DASHBOARD
 document.getElementById("summary").innerHTML = `
 <div class="card">
-<h2>${c.name}</h2>
-<div class="grid">
-<div class="box">Price<br><b>${c.price}</b></div>
-<div class="box">Market<br><b>${c.market}</b></div>
-<div class="box">P/E<br><b>${c.pe}</b></div>
-<div class="box">ROE<br><b>${c.roe}</b></div>
-</div>
-</div>`;
 
-// ANALYSIS
-document.getElementById("analysis").innerHTML = `
-<div class="card pros"><h3>Pros</h3>${c.pros.map(p=>"<li>"+p+"</li>").join("")}</div>
-<div class="card cons"><h3>Cons</h3>${c.cons.map(p=>"<li>"+p+"</li>").join("")}</div>`;
+<h2>${c.name}</h2>
+
+<div class="kpi-grid">
+<div class="kpi">Price<br><span>${c.price}</span></div>
+<div class="kpi">Market<br><span>${c.market}</span></div>
+<div class="kpi">P/E<br><span>${c.pe}</span></div>
+<div class="kpi">ROE<br><span>${c.roe}</span></div>
+</div>
+
+<div class="grid">
+<div>Open: ${c.open}</div>
+<div>High/Low: ${c.high}/${c.low}</div>
+<div>Volume: ${c.volume}</div>
+<div>52W High: ${c.high52}</div>
+<div>52W Low: ${c.low52}</div>
+<div>Dividend: ${c.dividend}</div>
+<div>Sector: ${c.sector}</div>
+<div>Industry: ${c.industry}</div>
+</div>
+
+<br>
+<h3>Price Trend</h3>
+<canvas id="miniChart"></canvas>
+
+</div>`;
 
 // P&L
 document.getElementById("pl").innerHTML = `
 <div class="card">
-<h3>Profit & Loss</h3>
+<h3>P&L</h3>
 <table>
 <tr><th>Year</th><th>Sales</th><th>Profit</th></tr>
 ${c.sales.map((s,i)=>`<tr><td>${2021+i}</td><td>${s}</td><td>${c.profit[i]}</td></tr>`).join("")}
@@ -226,28 +275,40 @@ ${c.sales.map((s,i)=>`<tr><td>${2021+i}</td><td>${s}</td><td>${c.profit[i]}</td>
 // BALANCE
 document.getElementById("balance").innerHTML = `
 <div class="card">
-<h3>Balance Sheet</h3>
+<h3>Balance</h3>
 <table>
 <tr><th>Year</th><th>Assets</th></tr>
 ${c.assets.map((a,i)=>`<tr><td>${2021+i}</td><td>${a}</td></tr>`).join("")}
 </table>
 </div>`;
 
-// CHARTS
+// CHARTS FIX
+setTimeout(()=>{
+
 if(chart1) chart1.destroy();
 if(chart2) chart2.destroy();
 
 chart1 = new Chart(document.getElementById("priceChart"), {
 type:"line",
 data:{labels:["2021","2022","2023","2024","2025"],
-datasets:[{label:"Price",data:c.chart,borderColor:"#3b82f6"}]}
+datasets:[{data:c.chart,borderColor:"cyan"}]}
 });
 
 chart2 = new Chart(document.getElementById("profitChart"), {
 type:"bar",
 data:{labels:["2021","2022","2023","2024","2025"],
-datasets:[{label:"Profit",data:c.profit,backgroundColor:"#22c55e"}]}
+datasets:[{data:c.profit,backgroundColor:"green"}]}
 });
+
+// MINI CHART
+new Chart(document.getElementById("miniChart"), {
+type:"line",
+data:{labels:["2021","2022","2023","2024","2025"],
+datasets:[{data:c.chart,borderColor:"orange"}]},
+options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}
+});
+
+},200);
 
 openTab("summary");
 }
@@ -262,10 +323,6 @@ document.getElementById(tab).style.display="block";
 
 function goBack(){
 location.reload();
-}
-
-function toggleTheme(){
-document.getElementById("body").classList.toggle("light");
 }
 
 </script>
