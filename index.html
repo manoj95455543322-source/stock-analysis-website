@@ -8,87 +8,106 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     margin:0;
+    background:#020617;
+    color:#e2e8f0;
+    transition:0.4s;
+}
+
+/* LIGHT MODE */
+.light {
     background:#f1f5f9;
+    color:black;
 }
 
+/* HEADER */
 .header {
-    background:#0f172a;
-    color:white;
     padding:20px;
     text-align:center;
+    border-bottom:1px solid #1e293b;
 }
 
-.search {
-    text-align:center;
-    padding:20px;
-}
-
+/* BUTTON */
 button {
     padding:10px 15px;
     margin:5px;
     border:none;
-    background:#2563eb;
+    background:#3b82f6;
     color:white;
     border-radius:5px;
     cursor:pointer;
 }
 
 button:hover {
-    background:#1e40af;
+    background:#2563eb;
 }
 
+/* SEARCH */
+.search {
+    text-align:center;
+    padding:20px;
+}
+
+/* TABS */
 .tabs {
     display:none;
-    background:white;
     padding:10px;
     text-align:center;
-    border-bottom:1px solid #ddd;
+    border-bottom:1px solid #1e293b;
 }
 
-.tabs button {
-    background:white;
-    color:black;
-}
-
-.tabs button:hover {
-    background:#e2e8f0;
-}
-
+/* CONTENT */
 .content {
     display:none;
     padding:20px;
+    animation:fade 0.5s;
 }
 
+/* ANIMATION */
+@keyframes fade {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+/* CARDS */
 .card {
-    background:white;
+    border:1px solid #1e293b;
     padding:20px;
     margin:20px auto;
-    max-width:800px;
+    max-width:900px;
     border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.box {
+    padding:15px;
+    border:1px solid #1e293b;
+    border-radius:10px;
+}
+
+/* TABLE */
 table {
     width:100%;
     border-collapse:collapse;
-    margin-top:10px;
-}
-
-table, th, td {
-    border:1px solid #ddd;
 }
 
 th {
-    background:#2563eb;
-    color:white;
+    background:#1e293b;
     padding:10px;
 }
 
 td {
     padding:10px;
     text-align:center;
+    border-bottom:1px solid #1e293b;
 }
 
+/* PROS CONS */
 .pros { border-left:5px solid green; }
 .cons { border-left:5px solid red; }
 
@@ -100,29 +119,27 @@ canvas {
 </style>
 </head>
 
-<body>
+<body id="body">
 
 <div class="header">
 <h1>📊 Stock Market Analyzer</h1>
+<button onclick="toggleTheme()">🌙 / ☀️</button>
 </div>
 
 <!-- SELECT -->
 <div class="search" id="searchBox">
 <h2>Select Company</h2>
-<button onclick="loadCompany('vtm')">VTM Ltd</button>
+<button onclick="loadCompany('vtm')">VTM</button>
 <button onclick="loadCompany('tcs')">TCS</button>
-<button onclick="loadCompany('infosys')">Infosys</button>
-<button onclick="loadCompany('reliance')">Reliance</button>
-<button onclick="loadCompany('hdfc')">HDFC Bank</button>
 </div>
 
 <!-- TABS -->
 <div class="tabs" id="tabs">
 <button onclick="openTab('summary')">Summary</button>
-<button onclick="openTab('chart')">Chart</button>
+<button onclick="openTab('chart')">Charts</button>
 <button onclick="openTab('analysis')">Analysis</button>
 <button onclick="openTab('pl')">P&L</button>
-<button onclick="openTab('balance')">Balance Sheet</button>
+<button onclick="openTab('balance')">Balance</button>
 <button onclick="goBack()">⬅ Back</button>
 </div>
 
@@ -130,7 +147,8 @@ canvas {
 <div id="summary" class="content"></div>
 
 <div id="chart" class="content">
-<canvas id="myChart"></canvas>
+<canvas id="priceChart"></canvas><br>
+<canvas id="profitChart"></canvas>
 </div>
 
 <div id="analysis" class="content"></div>
@@ -139,67 +157,35 @@ canvas {
 
 <script>
 
-let chart;
+let chart1, chart2;
 
 const data = {
 vtm: {
 name:"VTM Ltd",
 price:"₹75.6",
 market:"₹761 Cr",
+pe:"12.5",
+roe:"10%",
 chart:[60,80,50,120,75],
 sales:[194,209,208,345,371],
 profit:[15,9,18,45,22],
 assets:["100","150","200","250","394"],
-pros:["34% profit growth","Good dividend"],
-cons:["Low ROE","High debtor days"]
+pros:["Good growth","Dividend"],
+cons:["Low ROE"]
 },
 
 tcs: {
 name:"TCS",
 price:"₹3800",
 market:"₹13L Cr",
+pe:"30",
+roe:"40%",
 chart:[3000,3200,3400,3600,3800],
 sales:[100,120,140,160,180],
 profit:[30,35,40,45,50],
 assets:["5000","6000","7000","8000","10000"],
-pros:["Market leader","High profit"],
+pros:["Market leader"],
 cons:["Slow growth"]
-},
-
-infosys: {
-name:"Infosys",
-price:"₹1500",
-market:"₹6L Cr",
-chart:[1200,1300,1400,1450,1500],
-sales:[80,90,100,110,120],
-profit:[20,25,28,30,32],
-assets:["2000","3000","4000","4500","5000"],
-pros:["Stable growth"],
-cons:["Competition"]
-},
-
-reliance: {
-name:"Reliance",
-price:"₹2500",
-market:"₹16L Cr",
-chart:[2000,2200,2300,2400,2500],
-sales:[200,250,300,350,400],
-profit:[40,50,60,70,80],
-assets:["10000","12000","15000","18000","20000"],
-pros:["Diversified"],
-cons:["High debt"]
-},
-
-hdfc: {
-name:"HDFC Bank",
-price:"₹1600",
-market:"₹12L Cr",
-chart:[1400,1500,1550,1580,1600],
-sales:[150,160,170,180,190],
-profit:[35,38,40,42,45],
-assets:["9000","12000","15000","17000","18000"],
-pros:["Strong bank"],
-cons:["NPA risk"]
 }
 };
 
@@ -214,57 +200,53 @@ let c = data[company];
 document.getElementById("summary").innerHTML = `
 <div class="card">
 <h2>${c.name}</h2>
-<p><b>Price:</b> ${c.price}</p>
-<p><b>Market Cap:</b> ${c.market}</p>
+<div class="grid">
+<div class="box">Price<br><b>${c.price}</b></div>
+<div class="box">Market<br><b>${c.market}</b></div>
+<div class="box">P/E<br><b>${c.pe}</b></div>
+<div class="box">ROE<br><b>${c.roe}</b></div>
+</div>
 </div>`;
 
 // ANALYSIS
 document.getElementById("analysis").innerHTML = `
-<div class="card pros"><h3>Pros</h3><ul>${c.pros.map(p=>"<li>"+p+"</li>").join("")}</ul></div>
-<div class="card cons"><h3>Cons</h3><ul>${c.cons.map(p=>"<li>"+p+"</li>").join("")}</ul></div>`;
+<div class="card pros"><h3>Pros</h3>${c.pros.map(p=>"<li>"+p+"</li>").join("")}</div>
+<div class="card cons"><h3>Cons</h3>${c.cons.map(p=>"<li>"+p+"</li>").join("")}</div>`;
 
-// P&L TABLE
+// P&L
 document.getElementById("pl").innerHTML = `
 <div class="card">
 <h3>Profit & Loss</h3>
 <table>
 <tr><th>Year</th><th>Sales</th><th>Profit</th></tr>
-<tr><td>2021</td><td>${c.sales[0]}</td><td>${c.profit[0]}</td></tr>
-<tr><td>2022</td><td>${c.sales[1]}</td><td>${c.profit[1]}</td></tr>
-<tr><td>2023</td><td>${c.sales[2]}</td><td>${c.profit[2]}</td></tr>
-<tr><td>2024</td><td>${c.sales[3]}</td><td>${c.profit[3]}</td></tr>
-<tr><td>2025</td><td>${c.sales[4]}</td><td>${c.profit[4]}</td></tr>
+${c.sales.map((s,i)=>`<tr><td>${2021+i}</td><td>${s}</td><td>${c.profit[i]}</td></tr>`).join("")}
 </table>
 </div>`;
 
-// BALANCE TABLE
+// BALANCE
 document.getElementById("balance").innerHTML = `
 <div class="card">
 <h3>Balance Sheet</h3>
 <table>
 <tr><th>Year</th><th>Assets</th></tr>
-<tr><td>2021</td><td>${c.assets[0]}</td></tr>
-<tr><td>2022</td><td>${c.assets[1]}</td></tr>
-<tr><td>2023</td><td>${c.assets[2]}</td></tr>
-<tr><td>2024</td><td>${c.assets[3]}</td></tr>
-<tr><td>2025</td><td>${c.assets[4]}</td></tr>
+${c.assets.map((a,i)=>`<tr><td>${2021+i}</td><td>${a}</td></tr>`).join("")}
 </table>
 </div>`;
 
-// CHART
-if(chart) chart.destroy();
+// CHARTS
+if(chart1) chart1.destroy();
+if(chart2) chart2.destroy();
 
-chart = new Chart(document.getElementById("myChart"), {
+chart1 = new Chart(document.getElementById("priceChart"), {
 type:"line",
-data:{
-labels:["2021","2022","2023","2024","2025"],
-datasets:[{
-label:"Stock Price",
-data:c.chart,
-borderColor:"#2563eb",
-borderWidth:3
-}]
-}
+data:{labels:["2021","2022","2023","2024","2025"],
+datasets:[{label:"Price",data:c.chart,borderColor:"#3b82f6"}]}
+});
+
+chart2 = new Chart(document.getElementById("profitChart"), {
+type:"bar",
+data:{labels:["2021","2022","2023","2024","2025"],
+datasets:[{label:"Profit",data:c.profit,backgroundColor:"#22c55e"}]}
 });
 
 openTab("summary");
@@ -280,6 +262,10 @@ document.getElementById(tab).style.display="block";
 
 function goBack(){
 location.reload();
+}
+
+function toggleTheme(){
+document.getElementById("body").classList.toggle("light");
 }
 
 </script>
